@@ -1,0 +1,78 @@
+#!/bin/bash
+# This deploy hook gets executed after dependencies are resolved and the
+# build hook has been run but before the application has been started back
+# up again.  This script gets executed directly, so it could be python, php,
+# ruby, etc.
+
+set -e
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+
+#####################################################################
+# Hack HOME PATH
+#HOME=$HOME
+#export HOME=${OPENSHIFT_HOMEDIR}app-root/repo/
+
+#####################################################################
+echo 1>&2
+echo "Khởi tạo môi trường làm việc..." 1>&2
+
+# Thư mục gốc của ứng dụng PHP
+export CI_ROOT="${OPENSHIFT_HOMEDIR}app-root/repo/"
+
+# Chế độ làm việc production hoặc development
+export CI_ENV="${APPLICATION_ENV:-production}"
+# Khóa an toàn
+export CI_KEY=${OPENSHIFT_SECRET_TOKEN:0:31}
+# Đường dẫn lưu trữ dữ liệu
+export CI_STORAGE=${OPENSHIFT_DATA_DIR}
+export CI_CACHE_PATH=${OPENSHIFT_DATA_DIR}cache/
+export CI_LOG_PATH=${OPENSHIFT_PHP_LOG_DIR}/
+export CI_DATA_PATH=${CI_STORAGE}data/
+
+#####################################################################
+# Lưu lại
+if [ "$(type -t set_env_var)" == "function" ]; then
+	set_env_var 'CI_ROOT' $CI_ROOT $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_ENV' $CI_ENV $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_KEY' $CI_KEY $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_STORAGE' $CI_STORAGE $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_CACHE_PATH' $CI_CACHE_PATH $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_LOG_PATH' $CI_LOG_PATH $OPENSHIFT_HOMEDIR/.env/user_vars
+	set_env_var 'CI_DATA_PATH' $CI_DATA_PATH $OPENSHIFT_HOMEDIR/.env/user_vars
+fi
+
+#####################################################################
+# Tạo các thư mục nếu chưa có
+if [ ! -d ${CI_CACHE_PATH} ]; then
+  echo 1>&2
+  echo "Tạo thư mục ${CI_CACHE_PATH}..." 1>&2
+  mkdir -p ${CI_CACHE_PATH}
+fi
+
+if [ ! -d ${CI_LOG_PATH} ]; then
+  echo 1>&2
+  echo "Tạo thư mục ${CI_LOG_PATH}..." 1>&2
+  mkdir -p ${CI_LOG_PATH}
+fi
+
+if [ ! -d ${CI_DATA_PATH} ]; then
+  echo 1>&2
+  echo "Tạo thư mục ${CI_DATA_PATH}..." 1>&2
+  mkdir -p ${CI_DATA_PATH}
+fi
+#####################################################################
+
+# Đi tới thư mục gốc của ứng dụng PHP
+cd $CI_ROOT
+
+# Link thư mục dữ liệu và thư mục uploads ở thư mục gốc
+if [ ! -L ${CI_DATA_PATH} ]; then
+  echo 1>&2
+  echo "Liên kết ${CI_DATA_PATH} tới ${CI_ROOT}uploads" 1>&2
+  ln -s $CI_DATA_PATH ${CI_ROOT}uploads
+fi
+
+# Cài đặt composer
+echo "Đang cài đặt các thành phần phụ thuộc composer..." 1>&2
+composer install -vv
+

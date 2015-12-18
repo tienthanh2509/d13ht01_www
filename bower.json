@@ -1,0 +1,25 @@
+{
+  "name": "d13ht01_www",
+  "authors": [
+    "Phạm Tiến Thành <tienthanh.dqc@gmail.com>"
+  ],
+  "description": "Trang nhất - D13HT01.TK",
+  "main": "public/index.php",
+  "moduleType": [],
+  "keywords": [
+    "d13ht01",
+    "codeigniter"
+  ],
+  "license": "GPLv2",
+  "homepage": "https://d13ht01.tk",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.6"
+  }
+}

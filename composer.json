@@ -1,0 +1,15 @@
+{
+    "name": "tienthanh2509/d13ht01_www",
+    "description": "Trang nhất - D13HT01.TK",
+    "require": {
+        "codeigniter/framework": "^3.0"
+    },
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Phạm Tiến Thành",
+            "email": "tienthanh.dqc@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
